@@ -46,15 +46,21 @@ class ProductApi
   end
 
   def categories
-    JSON.parse(RestClient.get "#{BASE}/assets/categories.json", "Api-Key" => ENV["MORPH_API_KEY"])
+    JSON.parse(RestClient.get "#{BASE}/assets/categories.json", "Api-Key" => api_key)
   end
 
   def products_in_category(id, page = 1)
-    JSON.parse(RestClient.get "#{BASE}/api/products", params: {category: id, page: page}, "Api-Key" => ENV["MORPH_API_KEY"])
+    JSON.parse(RestClient.get "#{BASE}/api/products", params: {category: id, page: page}, "Api-Key" => api_key)
   end
 
   def product_info(id)
-    JSON.parse(RestClient.get "#{BASE}/api/products/#{id}", params: {userAction: "Browse"}, "Api-Key" => ENV["MORPH_API_KEY"], "Security-Key" => encoder.encode(id))
+    JSON.parse(RestClient.get "#{BASE}/api/products/#{id}", params: {userAction: "Browse"}, "Api-Key" => api_key, "Security-Key" => encoder.encode(id))
+  end
+
+  private
+
+  def api_key
+    ENV["MORPH_API_KEY"]
   end
 end
 
