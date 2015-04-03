@@ -5,6 +5,7 @@ require "base64"
 require "dotenv"
 require "rest_client"
 require "yaml"
+require 'scraperwiki'
 
 # The "stupidest encoder in the world"
 class Encoder
