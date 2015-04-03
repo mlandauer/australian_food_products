@@ -63,7 +63,7 @@ class ProductApi
   end
 
   def product_info(id)
-    JSON.parse(RestClient.get "#{BASE}/api/products/#{id}", params: {userAction: "Browse"}, "Api-Key" => api_key, "Security-Key" => encoder.encode(id))
+    JSON.parse(RestClient.get "#{BASE}/api/products/#{id}", params: {userAction: "Browse"}, "Api-Key" => api_key, "Security-Key" => encoder.encode(id))["Items"]
   end
 
   private
@@ -98,11 +98,17 @@ def leaf_category_ids(categories)
   ids.sort
 end
 
-c = api.categories
-puts c.to_yaml
-p leaf_category_ids(c["Children"])
-
-#puts api.categories.to_yaml
-
-puts api.products_in_category("10000262").to_yaml
-#puts api.products_in_category_paged("10000262", 1).to_yaml
+leaf_category_ids(api.categories["Children"]).each do |category_id|
+  puts "Getting products for category id: #{category_id}..."
+  api.products_in_category(category_id).each do |product|
+    api.product_info(product["Gtin"]).each do |info|
+      record = {
+        "barcode" => info["Gtin"],
+        "description" => info["Description"],
+        "info" => info.to_json
+      }
+      p record
+      exit
+    end
+  end
+end
