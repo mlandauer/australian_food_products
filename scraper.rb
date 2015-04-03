@@ -107,8 +107,7 @@ leaf_category_ids(api.categories["Children"]).each do |category_id|
         "description" => info["Description"],
         "info" => info.to_json
       }
-      p record
-      exit
+      ScraperWiki.save_sqlite(["barcode", "description"], record)
     end
   end
 end
