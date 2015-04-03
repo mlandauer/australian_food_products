@@ -24,11 +24,7 @@ class Encoder
   end
 
   def offset_string(s, offset)
-    b = ""
-    s.each_byte do |d|
-      b = b + [d+offset].pack("c")
-    end
-    b
+    s.bytes.map{|d| d+offset}.pack("c*")
   end
 
   def offset(salt)
