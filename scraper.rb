@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Australian product information
+# Australian food product information with barcodes
 
 require "base64"
 require "dotenv"
@@ -36,16 +36,26 @@ class Encoder
   end
 end
 
-def product_info(id, e)
-  JSON.parse(RestClient.get "https://goscan.gs1au.org/api/products/#{id}", params: {userAction: "Browse"}, "Api-Key" => ENV["MORPH_API_KEY"], "Security-Key" => e.encode(id))
-end
+class ProductApi
+  attr_reader :encoder
 
-def categories
-  JSON.parse(RestClient.get "https://goscan.gs1au.org/assets/categories.json", "Api-Key" => ENV["MORPH_API_KEY"])
-end
+  BASE = "https://goscan.gs1au.org"
 
-def products_in_category(id, page = 1)
-  JSON.parse(RestClient.get "https://goscan.gs1au.org/api/products", params: {category: "10000613", page: 1}, "Api-Key" => ENV["MORPH_API_KEY"])
+  def initialize
+    @encoder = Encoder.new
+  end
+
+  def categories
+    JSON.parse(RestClient.get "#{BASE}/assets/categories.json", "Api-Key" => ENV["MORPH_API_KEY"])
+  end
+
+  def products_in_category(id, page = 1)
+    JSON.parse(RestClient.get "#{BASE}/api/products", params: {category: id, page: page}, "Api-Key" => ENV["MORPH_API_KEY"])
+  end
+
+  def product_info(id)
+    JSON.parse(RestClient.get "#{BASE}/api/products/#{id}", params: {userAction: "Browse"}, "Api-Key" => ENV["MORPH_API_KEY"], "Security-Key" => encoder.encode(id))
+  end
 end
 
 Dotenv.load
@@ -56,6 +66,7 @@ e = Encoder.new
 raise unless e.decode("MTlANzc3Nz08QDo7OkA3") == "09343956000092"
 raise unless e.decode(e.encode("09343956000092")) == "09343956000092"
 
-#p categories
-p products_in_category("10000613")
-#p product_info("09343956000092", e)
+api = ProductApi.new
+#p api.categories
+#p api.products_in_category("10000613")
+p api.product_info("09343956000092")
