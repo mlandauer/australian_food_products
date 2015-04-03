@@ -1,6 +1,9 @@
+#!/usr/bin/env ruby
 # Australian product information
 
 require "base64"
+require "dotenv"
+require "rest_client"
 
 # The "stupidest encoder in the world"
 class Encoder
@@ -33,9 +36,16 @@ class Encoder
   end
 end
 
+def product_info(id, e)
+  JSON.parse(RestClient.get "https://goscan.gs1au.org/api/products/#{id}", params: {userAction: "Browse"}, "Api-Key" => ENV["MORPH_API_KEY"], "Security-Key" => e.encode(id))
+end
 
-id = "09343956000092"
+Dotenv.load
+
 e = Encoder.new
-p id
-p e.encode(id)
-p e.decode(e.encode(id))
+
+# Just some quick tests for the "encoder"
+raise unless e.decode("MTlANzc3Nz08QDo7OkA3") == "09343956000092"
+raise unless e.decode(e.encode("09343956000092")) == "09343956000092"
+
+p product_info("09343956000092", e)
